@@ -34,7 +34,7 @@ GitHub push ──► AWS CodeBuild ──► Docker image ──► AWS ECR ─
 | `analytics/app.py` | Flask app — 4 routes + APScheduler background job |
 | `analytics/config.py` | DB connection string assembled from env vars |
 | `db/*.sql` | Schema creation + seed data |
-| `deployments/` | PostgreSQL PVC, Deployment, Service |
+| `deployments/` | PostgreSQL Secret, PVC, Deployment, Service |
 | `deployment-local/` | ConfigMap, Secret, app Deployment+Service for local k8s |
 | `deployment/` | Same manifests pointing at an ECR image (production) |
 
@@ -83,6 +83,7 @@ The `deployments/` directory contains a plain-Kubernetes PostgreSQL setup (no He
 
 ```bash
 kubectl apply -f deployments/pv.yaml
+kubectl apply -f deployments/postgresql-secret.yaml
 kubectl apply -f deployments/pvc.yaml
 kubectl apply -f deployments/postgresql-deployment.yaml
 kubectl apply -f deployments/postgresql-service.yaml
@@ -161,7 +162,7 @@ metadata:
   name: coworking-config
 data:
   DB_NAME: mydatabase
-  DB_USERNAME: myuser
+  DB_USERNAME: myuser            # must be DB_USERNAME, not DB_USER
   DB_HOST: postgresql-service   # matches the k8s Service name
   DB_PORT: "5432"
 ---
@@ -325,6 +326,7 @@ The driver dynamically provisions an EBS volume when a PVC is created, so there 
 ### Step 5 — Deploy PostgreSQL to EKS
 
 ```bash
+kubectl apply -f deployments/postgresql-secret.yaml
 kubectl apply -f deployments/pvc.yaml
 kubectl apply -f deployments/postgresql-deployment.yaml
 kubectl apply -f deployments/postgresql-service.yaml
@@ -354,7 +356,7 @@ metadata:
   name: coworking-config
 data:
   DB_NAME: mydatabase
-  DB_USERNAME: myuser
+  DB_USERNAME: myuser            # must be DB_USERNAME, not DB_USER
   DB_HOST: postgresql-service
   DB_PORT: "5432"
 ---

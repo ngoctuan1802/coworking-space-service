@@ -21,9 +21,31 @@ spec:
         - name: POSTGRES_USER
           value: myuser
         - name: POSTGRES_PASSWORD
-          value: mypassword
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: POSTGRES_PASSWORD
         ports:
         - containerPort: 5432
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "myuser", "-d", "mydatabase"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "myuser", "-d", "mydatabase"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: postgresql-storage

@@ -32,6 +32,13 @@ spec:
       - name: coworking
         image: <DOCKER_IMAGE_URI_FROM_ECR>
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
         livenessProbe:
           httpGet:
             path: /health_check

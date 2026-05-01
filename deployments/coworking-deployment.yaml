@@ -3,8 +3,7 @@ kind: Service
 metadata:
   name: coworking
 spec:
-  # A local environment doesn't generally have a LoadBalancer, so we use NodePort instead.
-  type: NodePort
+  type: LoadBalancer
   selector:
     service: coworking
   ports:
@@ -31,35 +30,36 @@ spec:
     spec:
       containers:
       - name: coworking
-        # Locally hosted docker image
-        image: <DOCKER_IMAGE_NAME>:<IMAGE_TAG>
-        imagePullPolicy: IfNotPresent
+        image: 389344331250.dkr.ecr.us-east-1.amazonaws.com/coworking-analytics:latest
+        imagePullPolicy: Always
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
             cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         livenessProbe:
           httpGet:
             path: /health_check
             port: 5153
-          initialDelaySeconds: 5
-          timeoutSeconds: 2
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: "/readiness_check"
+            path: /readiness_check
             port: 5153
           initialDelaySeconds: 5
+          periodSeconds: 5
           timeoutSeconds: 5
         envFrom:
         - configMapRef:
-            name: <NAME OF THE ConfigMap>
+            name: coworking-config
         env:
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: <NAME OF THE Secret>
-              key: <THE KEY FROM Secret WHICH has THE ENCODED PASSWORD>
+              name: coworking-secret
+              key: DB_PASSWORD
       restartPolicy: Always

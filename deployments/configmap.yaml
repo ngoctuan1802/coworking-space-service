@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coworking-config
+data:
+  DB_HOST: postgresql-service
+  DB_PORT: "5432"
+  DB_NAME: mydatabase
+  DB_USERNAME: myuser
